@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNEAKER SPECIAL - ระบบจองคิวรองเท้าสำหรับรุ่นพิเศษ</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome (ไอคอน) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background: #ede9fe; font-family: 'Sarabun', sans-serif; margin: 0; }
+        .auth-container { max-width: 400px; margin: 60px auto; background: #fff; border-radius: 18px; box-shadow: 0 2px 8px #0001; padding: 32px 24px; }
+        .logo-section { text-align: center; margin-bottom: 18px; }
+        .logo { font-size: 2.5em; }
+        .brand-name { margin: 0; font-size: 1.5em; }
+        .brand-tagline { color: #7c3aed; margin-bottom: 10px; }
+        .form-tabs { display: flex; justify-content: center; margin-bottom: 18px; }
+        .tab-button { flex: 1; padding: 10px 0; border: none; background: #ede9fe; color: oklch(54.134% 0.24669 293.012); font-size: 1em; cursor: pointer; border-radius: 8px 8px 0 0; }
+        .tab-button.active { background: #7c3aed; color: #fff; }
+        .form-container { background: #fff; border-radius: 0 0 12px 12px; }
+        .form-panel { display: none; }
+        .form-panel.active { display: block; }
+        .input-group { margin-bottom: 16px; }
+        .form-input { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 1em; }
+        .form-button { width: 100%; padding: 12px; background: #7c3aed; color: #fff; border: none; border-radius: 8px; font-size: 1.1em; cursor: pointer; }
+        .form-button:hover { background: #5b21b6; }
+        .terms-check { margin-bottom: 12px; }
+        .error-message { color: #e74c3c; text-align: center; margin-bottom: 8px; }
+        .success-message { color: #1abc9c; text-align: center; margin-bottom: 8px; }
+        @media (max-width: 480px) {
+  .auth-container {
+    margin: 24px 12px;
+    padding: 24px 18px;
+    box-shadow: none;
+    border-radius: 12px;
+  }
+
+  .logo-section .logo {
+    font-size: 2em;
+  }
+
+  .brand-name {
+    font-size: 1.2em;
+  }
+
+  .form-input {
+    font-size: 1em;
+    padding: 12px;
+  }
+
+  .form-button {
+    font-size: 1em;
+    padding: 10px;
+  }
+
+  .tab-button {
+    font-size: 0.95em;
+    padding: 8px 0;
+  }
+}
+        @keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.input-group.floating {
+  position: relative;
+}
+
+.input-group.floating label {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  background: #fff;
+  padding: 0 4px;
+  color: #999;
+  transition: 0.2s ease;
+  pointer-events: none;
+}
+
+.input-group.floating input:focus + label,
+.input-group.floating input:not(:placeholder-shown) + label {
+  top: -8px;
+  left: 8px;
+  font-size: 0.8em;
+  color: #7c3aed;
+}
+    </style>
+</head>
+<body>
+    <div class="auth-container" id="authPage">
+        <div class="logo-section">
+            <div class="logo">👟</div>
+            <h1 class="brand-name">SNEAKER SPECIAL</h1>
+            <p class="brand-tagline">ระบบจองคิวรองเท้าสำหรับรุ่นพิเศษ</p>
+        </div>
+        <div class="form-tabs">
+            <button class="tab-button active" onclick="switchTab('login')">เข้าสู่ระบบ</button>
+            <button class="tab-button" onclick="switchTab('register')">สมัครสมาชิก</button>
+        </div>
+        
+        <div class="form-container">
+   <div class="form-panel active" id="loginPanel">
+  <form id="loginForm">
+  <div class="error-message" id="loginError"></div>
+  <div class="success-message" id="loginSuccess"></div>
+
+  <div class="input-group floating">
+    <input type="email" class="form-input" id="loginEmail" required>
+    <label for="loginEmail">อีเมล</label>
+  </div>
+  <div class="input-group floating">
+    <input type="password" class="form-input" id="loginPassword" required>
+    <label for="loginPassword">รหัสผ่าน</label>
+  </div>
+  <button type="submit" class="form-button" id="loginBtn">
+    <i class="fas fa-sign-in-alt"></i> เข้าสู่ระบบ
+  </button>
+</form>
+<p style="text-align:center; margin-top:12px;">
+  <a href="#" onclick="switchTab('login'); forgotPassword()" style="color:#7c3aed;">ลืมรหัสผ่าน?</a>
+</p>
+
+</div>
+
+<!-- REGISTER FORM -->
+<div class="form-panel" id="registerPanel">
+  <form id="registerForm">
+    <div class="error-message" id="registerError"></div>
+    <div class="success-message" id="registerSuccess"></div>
+
+    <div class="input-group floating">
+      <input type="text" class="form-input" id="registerName" placeholder=" " required>
+      <label for="registerName">ชื่อ-นามสกุล</label>
+    </div>
+
+    <div class="input-group floating">
+      <input type="email" class="form-input" id="registerEmail" placeholder=" " required>
+      <label for="registerEmail">อีเมล</label>
+    </div>
+
+    <div class="input-group floating">
+      <input type="tel" class="form-input" id="registerPhone" placeholder=" " required inputmode="tel">
+      <label for="registerPhone">เบอร์โทรศัพท์</label>
+    </div>
+
+    <div class="input-group floating">
+      <input type="password" class="form-input" id="registerPassword" placeholder=" " required>
+      <label for="registerPassword">รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)</label>
+    </div>
+
+    <div class="input-group floating">
+      <input type="password" class="form-input" id="confirmPassword" placeholder=" " required>
+      <label for="confirmPassword">ยืนยันรหัสผ่าน</label>
+    </div>
+
+    <div class="terms-check">
+      <input type="checkbox" id="agreeTerms" required>
+      <label for="agreeTerms">
+        ฉันยอมรับ <a href="#">ข้อกำหนดการใช้งาน</a> และ <a href="#">นโยบายความเป็นส่วนตัว</a>
+      </label>
+    </div>
+
+    <button type="submit" class="form-button" id="registerBtn">
+      <i class="fas fa-user-plus"></i> สมัครสมาชิก
+    </button>
+  </form>
+</div>
+        </div>
+    </div>
+  <script>
+    let forgotEmail = "";
+  // สลับแท็บ
+ function switchTab(tab) {
+  document.getElementById('loginPanel').classList.remove('active');
+  document.getElementById('registerPanel').classList.remove('active');
+  document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+
+  if (tab === 'login') {
+    document.getElementById('loginPanel').classList.add('active');
+    document.querySelectorAll('.tab-button')[0].classList.add('active');
+  } else {
+    document.getElementById('registerPanel').classList.add('active');
+    document.querySelectorAll('.tab-button')[1].classList.add('active');
+  }
+
+  showError('');
+  showSuccess('');
+}
+
+
+// ✅ ฟังก์ชันแสดงข้อความ
+function showError(msg) {
+  document.getElementById('loginError').innerHTML = '';
+  document.getElementById('loginSuccess').innerHTML = '';
+  document.getElementById('registerError').innerHTML = '';
+  document.getElementById('registerSuccess').innerHTML = '';
+
+  if (document.getElementById('loginPanel').classList.contains('active')) {
+    document.getElementById('loginError').innerHTML = msg;
+  } else {
+    document.getElementById('registerError').innerHTML = msg;
+  }
+}
+
+function showSuccess(msg) {
+  document.getElementById('loginError').innerHTML = '';
+  document.getElementById('loginSuccess').innerHTML = '';
+  document.getElementById('registerError').innerHTML = '';
+  document.getElementById('registerSuccess').innerHTML = '';
+
+  if (document.getElementById('loginPanel').classList.contains('active')) {
+    document.getElementById('loginSuccess').innerHTML = msg;
+  } else {
+    document.getElementById('registerSuccess').innerHTML = msg;
+  }
+}
+
+
+  // ✅ ฟังก์ชันลืมรหัสผ่าน
+  function showForgotPopup(email) {
+  const popup = document.createElement('div');
+  popup.innerHTML = `
+    <div style="
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center;
+      z-index: 9999; animation: fadeIn 0.3s ease;
+    ">
+      <div style="
+        background: #fff; padding: 24px 32px; border-radius: 12px; text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3); max-width: 360px;
+      ">
+        <h2 style="color: #7c3aed;">🔐 รีเซ็ตรหัสผ่าน</h2>
+        <p style="font-size: 1.1em; color: #333;">อีเมล: <strong>${email}</strong></p>
+        <input type="password" id="popupNewPassword" placeholder="รหัสผ่านใหม่" style="
+          width: 100%; padding: 8px; margin-top: 12px; border: 1px solid #ccc; border-radius: 6px;
+        ">
+        <div id="popupForgotError" style="color: red; margin-top: 8px;"></div>
+        <div style="margin-top: 16px;">
+          <button onclick="submitPopupForgot()" style="
+            padding: 8px 16px; background: #7c3aed; color: #fff;
+            border: none; border-radius: 6px; cursor: pointer;
+          ">ยืนยัน</button>
+          <button onclick="closePopupForgot()" style="
+            margin-left: 8px; background: #ccc; border: none;
+            padding: 8px 16px; border-radius: 6px; cursor: pointer;
+          ">ยกเลิก</button>
+        </div>
+      </div>
+    </div>
+  `;
+  popup.id = "forgotPopup";
+  document.body.appendChild(popup);
+}
+
+function closePopupForgot() {
+  const popup = document.getElementById("forgotPopup");
+  if (popup) popup.remove();
+}
+
+function submitPopupForgot() {
+  const newPassword = document.getElementById("popupNewPassword").value.trim();
+  if (newPassword.length < 6) {
+    document.getElementById("popupForgotError").innerText = "รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร";
+    return;
+  }
+
+  let users = JSON.parse(localStorage.getItem('users') || '[]');
+  const userIndex = users.findIndex(u => u.email === forgotEmail);
+  if (userIndex === -1) return;
+
+  users[userIndex].password = newPassword;
+  localStorage.setItem('users', JSON.stringify(users));
+  showSuccess("รีเซ็ตรหัสผ่านสำเร็จ! กรุณาเข้าสู่ระบบด้วยรหัสใหม่");
+  document.getElementById('loginForm').reset();
+  closePopupForgot();
+}
+
+
+  // สมัครสมาชิก
+  document.getElementById('registerForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const name = document.getElementById('registerName').value.trim();
+    const email = document.getElementById('registerEmail').value.trim();
+    const phone = document.getElementById('registerPhone').value.trim();
+    const password = document.getElementById('registerPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const agreeTerms = document.getElementById('agreeTerms').checked;
+
+    if (!agreeTerms) return showError('กรุณายอมรับข้อกำหนดการใช้งาน');
+    if (password.length < 6) return showError('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
+    if (password !== confirmPassword) return showError('รหัสผ่านไม่ตรงกัน');
+
+    let users = JSON.parse(localStorage.getItem('users') || '[]');
+    if (users.find(u => u.email === email)) return showError('อีเมลนี้ถูกใช้ไปแล้ว');
+    if (users.find(u => u.phone === phone)) return showError('เบอร์โทรนี้ถูกใช้ไปแล้ว');
+
+    users.push({ name, email, phone, password });
+    localStorage.setItem('users', JSON.stringify(users));
+    showSuccess('สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ');
+    setTimeout(() => switchTab('login'), 1500);
+  });
+
+  // เข้าสู่ระบบ
+  document.getElementById('loginForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    let users = JSON.parse(localStorage.getItem('users') || '[]');
+    const user = users.find(u => u.email === email && u.password === password);
+    if (!user) return showError('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    showLoginPopup(user.name);
+
+
+  });
+  function showLoginPopup(name) {
+  const popup = document.createElement('div');
+  popup.innerHTML = `
+    <div style="
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center;
+      z-index: 9999; animation: fadeIn 0.3s ease;
+    ">
+      <div style="
+        background: #fff; padding: 24px 32px; border-radius: 12px; text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3); max-width: 360px;
+      ">
+        <h2 style="color: #7c3aed;">✅ เข้าสู่ระบบสำเร็จ</h2>
+        <p style="font-size: 1.1em; color: #333;">ยินดีต้อนรับ <strong>${name}</strong></p>
+        <p style="margin-top: 12px;">กำลังไปหน้า <strong>products.html</strong>...</p>
+        <button onclick="closePopup()" style="
+          margin-top: 16px; padding: 8px 16px; background: #7c3aed; color: #fff;
+          border: none; border-radius: 6px; cursor: pointer;
+        ">ตกลง</button>
+      </div>
+    </div>
+  `;
+  popup.id = "loginPopup";
+  document.body.appendChild(popup);
+
+  setTimeout(() => {
+    window.location.href = "products.html";
+  }, 2000);
+}
+
+function closePopup() {
+  const popup = document.getElementById("loginPopup");
+  if (popup) popup.remove();
+}
+function forgotPassword() {
+  const email = document.getElementById('loginEmail').value.trim();
+  if (!email) return showError('กรุณากรอกอีเมลก่อน');
+
+  let users = JSON.parse(localStorage.getItem('users') || '[]');
+  const userIndex = users.findIndex(u => u.email === email);
+  if (userIndex === -1) return showError('ไม่พบอีเมลนี้ในระบบ');
+
+  forgotEmail = email;
+  showForgotPopup(email); // ✅ เรียก popup สวย ๆ
+}
+
+</script>
+<div id="forgotModal" style="display:none;" class="modal-overlay">
+  <div class="modal-box">
+    <h3>🔐 รีเซ็ตรหัสผ่าน</h3>
+    <p id="forgotEmailText" style="font-size:0.9em; color:#555;"></p>
+    <input type="password" id="forgotNewPassword" placeholder="รหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)">
+    <div class="modal-actions">
+      <button onclick="submitForgotPassword()">ยืนยัน</button>
+      <button onclick="closeForgotModal()">ยกเลิก</button>
+    </div>
+    <div id="forgotError" style="color:red; margin-top:8px;"></div>
+  </div>
+</div>
+</body>
+</html>
