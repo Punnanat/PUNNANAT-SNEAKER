@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>ระบบจองคิวรองเท้ารุ่นพิเศษ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { 
+      font-family: 'Sarabun', sans-serif; 
+      background: linear-gradient(135deg, #a78bfa 0%, #f0abfc 100%); 
+      margin: 0; 
+      padding: 20px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .order-container { 
+      max-width: 500px; 
+      margin: 40px auto; 
+      background: #fff; 
+      border-radius: 18px; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+      padding: 32px 24px; 
+      box-sizing: border-box;
+    }
+    .sneaker-img { 
+      display: flex; 
+      justify-content: center; 
+      margin-bottom: 16px; 
+    }
+    .sneaker-img img { 
+      width: 180px; 
+      max-width: 100%; 
+      border-radius: 10px; 
+      height: auto;
+    }
+    .meta { margin-bottom: 20px; }
+    .meta span { display: block; color: #555; }
+    .meta .name { font-size: 1.2em; font-weight: bold; color: #222; margin-bottom: 6px; }
+    .meta .price { color: #7c3aed; font-size: 1.1em; }
+    .badge { color: #16a34a; font-size: 1em; margin-bottom: 8px; }
+    form label { display: block; margin-top: 12px; color: #333; }
+    form input, form select { 
+      width: 100%; 
+      padding: 10px; 
+      margin-top: 4px; 
+      border-radius: 6px; 
+      border: 1px solid #ccc; 
+      font-size: 1em; 
+      box-sizing: border-box; 
+      transition: border-color 0.3s ease;
+    }
+    form input:focus, form select:focus {
+      border-color: #7c3aed;
+      outline: none;
+    }
+    .order-btn { 
+      width: 100%; 
+      margin-top: 20px; 
+      padding: 14px; 
+      background: #7c3aed; 
+      color: #fff; 
+      border: none; 
+      border-radius: 8px; 
+      font-size: 1.1em; 
+      cursor: pointer; 
+      transition: background-color 0.3s; 
+      user-select: none;
+    }
+    .order-btn:hover:not(:disabled) { background: #5b21b6; }
+    .order-btn:disabled { background: #ccc; cursor: not-allowed; }
+    .success { color: #1abc9c; text-align: center; margin-top: 12px; }
+    .error { color: #e74c3c; text-align: center; margin-top: 12px; }
+    .logout-btn { 
+      position: fixed; 
+      top: 20px; 
+      right: 30px; 
+      background: #e74c3c; 
+      color: #fff; 
+      border: none; 
+      border-radius: 8px; 
+      padding: 8px 18px; 
+      font-size: 1em; 
+      cursor: pointer;
+      z-index: 100;
+      user-select: none;
+    }
+    #clockDisplay {
+      text-align:center; 
+      font-weight:bold; 
+      color:#7c3aed; 
+      margin-bottom:12px;
+      font-size: 1.1em;
+    }
+    
+    /* Responsive */
+   /* ในไฟล์ HTML ของหน้า Product / Order */
+@media (max-width: 600px) {
+  .product-grid { gap: 16px; }
+  .product-card { width: calc(100% - 40px); padding: 16px; }
+  .product-name { font-size: 1em; }
+  .product-price { font-size: 1em; }
+  .product-meta { font-size: 0.9em; }
+  .product-btn { padding: 10px 20px; font-size: 0.95em; }
+}
+
+  </style>
+</head>
+<body>
+  <button class="logout-btn" onclick="logout()">ออกจากระบบ</button>
+  <div class="order-container" role="main" aria-label="ฟอร์มสั่งจองรองเท้ารุ่นพิเศษ">
+    <div class="sneaker-img" aria-live="polite"><img id="productImg" src="" alt="รองเท้า" /></div>
+    <div class="meta">
+      <span class="name" id="productName"></span>
+      <span id="productCode"></span>
+      <span id="productRelease"></span>
+      <span id="productStock"></span>
+      <span class="price" id="productPrice"></span>
+    </div>
+    <div class="badge" id="stockStatus" aria-live="polite"><i>✔ เปิดให้จองแล้ว</i></div>
+    <div class="badge"><i>" กรุณากรอกข้อมูลให้ครบถ้วน"</i></div>
+    <div id="clockDisplay" aria-live="polite"></div>
+
+    <form id="orderForm" novalidate>
+      <label for="customerName">ชื่อ-นามสกุล</label>
+      <input type="text" id="customerName" required autocomplete="name" />
+
+      <label for="customerPhone">เบอร์โทรศัพท์</label>
+      <input type="tel" id="customerPhone" required pattern="0[0-9]{8,9}" placeholder="0812345678" autocomplete="tel" />
+
+      <label for="customerEmail">อีเมล</label>
+      <input type="email" id="customerEmail" required autocomplete="email" />
+
+      <label for="houseNumber">บ้านเลขที่ / หมู่ / ถนน</label>
+      <input type="text" id="houseNumber" required autocomplete="address-line1" />
+
+      <label for="province">จังหวัด</label>
+      <select id="province" required aria-required="true" aria-describedby="provinceHelp">
+        <option value="">-- กรุณาเลือกจังหวัด --</option>
+      </select>
+
+      <label for="district">เขต / อำเภอ</label>
+      <select id="district" required aria-required="true">
+        <option value="">-- กรุณาเลือกอำเภอ --</option>
+      </select>
+
+      <label for="subdistrict">แขวง / ตำบล</label>
+      <select id="subdistrict" required aria-required="true">
+        <option value="">-- กรุณาเลือกตำบล --</option>
+      </select>
+
+      <label for="zipcode">รหัสไปรษณีย์</label>
+      <input type="text" id="zipcode" readonly required placeholder="รหัสไปรษณีย์" aria-readonly="true" />
+
+      <label for="shoeSize">ไซส์รองเท้า (US)</label>
+      <select id="shoeSize" required aria-required="true">
+        <option value="">-- กรุณาเลือกไซส์ --</option>
+        <option value="7">7</option>
+        <option value="7.5">7.5</option>
+        <option value="8">8</option>
+        <option value="8.5">8.5</option>
+        <option value="9">9</option>
+        <option value="9.5">9.5</option>
+        <option value="10">10</option>
+        <option value="10.5">10.5</option>
+        <option value="11">11</option>
+        <option value="11.5">11.5</option>
+        <option value="12">12</option>
+      </select>
+
+      <button type="submit" class="order-btn" id="submitBtn" aria-live="polite" aria-busy="false">เข้าคิวจอง</button>
+    </form>
+
+    <div class="success" id="successMsg" role="alert" aria-live="assertive"></div>
+    <div class="error" id="errorMsg" role="alert" aria-live="assertive"></div>
+  </div>
+
+  <script>
+  const SHEET_URL = "https://script.google.com/macros/s/AKfycbziDixR5QDRUwF0MyG2MZjpZnN12aerT-xj0sHSMhMfryOcqcR3a87tqPw6DfWxUTxt/exec"; // <== เปลี่ยนตรงนี้
+
+  let geoData = [];
+
+  async function loadGeoData() {
+    try {
+      const res = await fetch('https://raw.githubusercontent.com/thailand-geography-data/thailand-geography-json/main/src/geography.json');
+      geoData = await res.json();
+      populateProvinces();
+    } catch (err) {
+      console.error('โหลดข้อมูลพื้นที่ไม่สำเร็จ:', err);
+      document.getElementById('errorMsg').textContent = '❌ โหลดข้อมูลพื้นที่ไม่สำเร็จ โปรดลองรีเฟรชหน้าใหม่';
+    }
+  }
+
+  function populateProvinces() {
+    const provSelect = document.getElementById('province');
+    provSelect.innerHTML = '<option value="">-- กรุณาเลือกจังหวัด --</option>';
+    const provSet = new Set(geoData.map(o => o.provinceNameTh));
+    provSet.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p;
+      opt.textContent = p;
+      provSelect.appendChild(opt);
+    });
+  }
+
+  const provinceEl = document.getElementById('province');
+  const districtEl = document.getElementById('district');
+  const subdistrictEl = document.getElementById('subdistrict');
+  const zipcodeEl = document.getElementById('zipcode');
+  const form = document.getElementById('orderForm');
+  const successMsg = document.getElementById('successMsg');
+  const errorMsg = document.getElementById('errorMsg');
+  const submitBtn = document.getElementById('submitBtn');
+
+  provinceEl.addEventListener('change', () => {
+    const prov = provinceEl.value;
+    districtEl.innerHTML = '<option value="">-- กรุณาเลือกอำเภอ --</option>';
+    subdistrictEl.innerHTML = '<option value="">-- กรุณาเลือกตำบล --</option>';
+    zipcodeEl.value = '';
+
+    if (!prov) return;
+
+    const districts = Array.from(new Set(
+      geoData.filter(o => o.provinceNameTh === prov).map(o => o.districtNameTh)
+    ));
+    districts.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d;
+      opt.textContent = d;
+      districtEl.appendChild(opt);
+    });
+  });
+
+  districtEl.addEventListener('change', () => {
+    const prov = provinceEl.value;
+    const dist = districtEl.value;
+    subdistrictEl.innerHTML = '<option value="">-- กรุณาเลือกตำบล --</option>';
+    zipcodeEl.value = '';
+
+    if (!dist) return;
+
+    const subs = geoData.filter(o => o.provinceNameTh === prov && o.districtNameTh === dist);
+    subs.forEach(o => {
+      const opt = document.createElement('option');
+      opt.value = o.subdistrictNameTh;
+      opt.textContent = o.subdistrictNameTh;
+      subdistrictEl.appendChild(opt);
+    });
+  });
+
+  subdistrictEl.addEventListener('change', () => {
+    const prov = provinceEl.value;
+    const dist = districtEl.value;
+    const subd = subdistrictEl.value;
+
+    if (!subd) {
+      zipcodeEl.value = '';
+      return;
+    }
+
+    const rec = geoData.find(o =>
+      o.provinceNameTh === prov &&
+      o.districtNameTh === dist &&
+      o.subdistrictNameTh === subd
+    );
+    zipcodeEl.value = rec ? rec.postalCode.toString() : '';
+  });
+
+  const products = [
+  {
+    id: "blackcat",
+    name: 'Nike Air Jordan 4 "Black Cat" 2024',
+    code: "CU1110-010",
+    price: 8900,
+    img: "https://www.sneakerfiles.com/wp-content/uploads/2024/08/air-jordan-4-rm-black-cat-FQ7939-004-release-info-1024x725.jpg",
+    release: "25 กันยายน 2025",
+    stock: 5
+  },
+  {
+    id: "travis1",
+    name: 'Nike Air Jordan 1 Low OG "Travis Scott"',
+    code: "DM7866-162",
+    price: 15900,
+    img: "https://2app.kicksonfire.com/kofapp/upload/events_images/ipad_travis-scott-x-air-jordan-1-low-og-black-olive-0.png",
+    release: "25 กันยายน 2025",
+    stock: 5
+  },
+  {
+    id: "yeezy",
+    name: 'adidas Yeezy Boost 350 V2 "Zebra"',
+    code: "CP9654",
+    price: 12500,
+    img: "https://www.sneakerfiles.com/wp-content/uploads/2018/10/adidas-yeezy-boost-350-v2-zebra-restock.jpg",
+    release: "25 กันยายน 2025",
+    stock: 5
+  },
+  {
+    id: "offwhite",
+    name: 'Nike Air Presto Off-White',
+    code: "AA3830-001",
+    price: 32000,
+    img: "https://www.kickgame.com/cdn/shop/products/Nike-Air-Presto-OW-AA3830-100-White_1.png?v=1658243604",
+    release: "25 กันยายน 2025",
+    stock: 5
+  }
+];
+
+const urlParams = new URLSearchParams(window.location.search);
+const productId = urlParams.get('product');
+const product = products.find(p => p.id === productId);
+
+if (!product) {
+  alert("❌ เข้าสู่ระบบการจองรองเท้ารุ่นพิเศษ");
+  window.location.href = "products.html";
+}
+
+
+
+  document.getElementById('productImg').src = product.img;
+  document.getElementById('productName').innerText = product.name;
+  document.getElementById('productCode').innerText = "รหัส: " + product.code;
+  document.getElementById('productRelease').innerText = "วันเปิดขาย: " + product.release;
+  document.getElementById('productStock').innerText = "จำนวน: " + product.stock + " คู่";
+  document.getElementById('productPrice').innerText = "฿" + product.price.toLocaleString();
+
+  const stockStatusEl = document.getElementById('stockStatus');
+  if(product.stock <= 0) {
+    stockStatusEl.innerHTML = '<i style="color:#e74c3c;">❌ สินค้าหมดสต็อก</i>';
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'สินค้าหมดสต็อก';
+  }
+
+  function updateClock() {
+    const now = new Date();
+    const time = now.toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
+    document.getElementById('clockDisplay').innerText = "เวลา: " + time;
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  function validatePhone(phone) {
+    const phonePattern = /^0\d{8,9}$/;
+    return phonePattern.test(phone);
+  }
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    successMsg.textContent = '';
+    errorMsg.textContent = '';
+
+    if(product.stock <= 0) {
+      errorMsg.textContent = '❌ สินค้าหมดสต็อก ไม่สามารถจองได้';
+      return;
+    }
+
+    const name = document.getElementById('customerName').value.trim();
+    const phone = document.getElementById('customerPhone').value.trim();
+    const email = document.getElementById('customerEmail').value.trim();
+    const province = provinceEl.value;
+    const district = districtEl.value;
+    const subdistrict = subdistrictEl.value;
+    const zipcode = zipcodeEl.value;
+    const houseNumber = document.getElementById('houseNumber').value.trim();
+    const shoeSize = document.getElementById('shoeSize').value;
+
+    if (!name || !phone || !email || !province || !district || !subdistrict || !zipcode || !houseNumber || !shoeSize) {
+      errorMsg.textContent = '❌ กรุณากรอกข้อมูลให้ครบถ้วนทุกช่อง';
+      return;
+    }
+
+    if (!validatePhone(phone)) {
+      errorMsg.textContent = '❌ เบอร์โทรศัพท์ไม่ถูกต้อง ต้องขึ้นต้นด้วย 0 และมี 9-10 หลัก';
+      return;
+    }
+
+    if (!form.checkValidity()) {
+      errorMsg.textContent = '❌ กรุณากรอกข้อมูลให้ถูกต้องตามแบบฟอร์ม';
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'กำลังส่งข้อมูล...';
+    submitBtn.setAttribute('aria-busy', 'true');
+
+    const now = new Date();
+    const date = now.toLocaleDateString('th-TH');
+    const time = now.toLocaleTimeString('th-TH');
+
+    try {
+      const response = await fetch(SHEET_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({
+          name,
+          phone,
+          email,
+          houseNumber,
+          province,
+          district,
+          subDistrict: subdistrict,
+          zipcode,
+          size: shoeSize,
+          date,
+          time,
+          product: product.name,
+          code: product.code
+        })
+      });
+
+      const result = await response.text();
+      if (result.toLowerCase().includes("success")) {
+        successMsg.innerHTML = `
+          ✅ สั่งจองสำเร็จ!<br>
+          <strong>ชื่อ:</strong> ${name}<br>
+          <strong>รุ่น:</strong> ${product.name}<br>
+          <strong>ไซส์:</strong> ${shoeSize}<br>
+          <strong>วันที่:</strong> ${date}<br>
+          <strong>เวลา:</strong> ${time}
+        `;
+        form.reset();
+      } else {
+        errorMsg.innerText = "❌ เกิดข้อผิดพลาด กรุณาลองใหม่";
+      }
+
+    } catch (err) {
+      console.error(err);
+      errorMsg.innerText = "❌ ไม่สามารถเชื่อมต่อได้: " + err.message;
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'เข้าคิวจอง';
+      submitBtn.setAttribute('aria-busy', 'false');
+    }
+  });
+
+  function logout() {
+    localStorage.removeItem('currentUser');
+    location.href = 'login.html';
+  }
+
+  loadGeoData();
+</script>
+
+</body>
+</html>

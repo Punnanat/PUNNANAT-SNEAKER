@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SNEAKER SPECIAL - จองคิวรองเท้า</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sarabun&display=swap');
+  * {
+    box-sizing: border-box;
+    font-family: 'Sarabun', sans-serif;
+  }
+  body {
+    margin: 0;
+    background: #ede9fe;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px;
+  }
+
+  .auth-container {
+    width: 100%;
+    max-width: 400px; /* เพิ่มขนาดบน Desktop */
+    padding: 28px 24px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .logo-section {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  /* โลโก้ขยับ */
+  .logo {
+    font-size: 3.2rem;
+    display: inline-block;
+    animation: bounce 2.4s ease-in-out infinite;
+    user-select: none;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  .brand-name {
+    font-size: 1.8rem;
+    margin: 8px 0 4px;
+  }
+  .brand-tagline {
+    color: #7c3aed;
+    margin-bottom: 14px;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .form-tabs {
+    display: flex;
+    margin-bottom: 16px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgb(124 58 237 / 0.2);
+  }
+  .tab-button {
+    flex: 1;
+    padding: 14px 0;
+    border: none;
+    background: #dcd6f7;
+    color: #333;
+    font-size: 1.1rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  .tab-button.active {
+    background: #7c3aed;
+    color: white;
+  }
+
+  .form-container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 18px 20px 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .form-panel {
+    display: none;
+  }
+  .form-panel.active {
+    display: block;
+  }
+
+  .input-group {
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .form-input {
+    width: 100%;
+    padding: 16px 14px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1.5px solid #ccc;
+    transition: border-color 0.3s;
+  }
+  .form-input:focus {
+    outline: none;
+    border-color: #7c3aed;
+  }
+
+  .input-group.floating label {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    background: white;
+    color: #999;
+    transition: 0.25s ease;
+    padding: 0 6px;
+    pointer-events: none;
+    font-weight: 500;
+  }
+  .input-group.floating input:focus + label,
+  .input-group.floating input:not(:placeholder-shown) + label {
+    top: -10px;
+    font-size: 0.8rem;
+    color: #7c3aed;
+    left: 10px;
+  }
+
+  .form-button {
+    width: 100%;
+    padding: 16px;
+    background: #7c3aed;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.15rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  .form-button:hover {
+    background: #5b21b6;
+  }
+
+  .terms-check {
+    font-size: 0.95rem;
+    margin-top: 12px;
+    user-select: none;
+  }
+  .terms-check input {
+    margin-right: 8px;
+    transform: scale(1.15);
+    vertical-align: middle;
+  }
+  .terms-check a {
+    color: #7c3aed;
+    text-decoration: none;
+  }
+  .terms-check a:hover {
+    text-decoration: underline;
+  }
+
+  .error-message, .success-message {
+    text-align: center;
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+    min-height: 20px;
+    font-weight: 600;
+    user-select: none;
+  }
+  .error-message {
+    color: #dc2626;
+  }
+  .success-message {
+    color: #16a34a;
+  }
+
+  /* Popup */
+  .popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.55);
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 12px;
+  }
+  .popup-box {
+    background: white;
+    padding: 28px 24px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  }
+  .popup-box input {
+    width: 100%;
+    padding: 14px;
+    margin: 14px 0;
+    border-radius: 8px;
+    border: 1.5px solid #ccc;
+    font-size: 1rem;
+  }
+  .popup-box input:focus {
+    border-color: #7c3aed;
+    outline: none;
+  }
+  .popup-box button {
+    padding: 12px 20px;
+    margin: 6px 6px 0;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .popup-box .confirm {
+    background: #7c3aed;
+    color: white;
+    transition: background-color 0.3s;
+  }
+  .popup-box .confirm:hover {
+    background: #5b21b6;
+  }
+  .popup-box .cancel {
+    background: #ccc;
+    color: #333;
+    transition: background-color 0.3s;
+  }
+  .popup-box .cancel:hover {
+    background: #999;
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .auth-container {
+      max-width: 100%;
+      padding: 24px 16px;
+      border-radius: 12px;
+      box-shadow: none;
+      height: auto;
+    }
+    .brand-name {
+      font-size: 1.5rem;
+    }
+    .brand-tagline {
+      font-size: 1rem;
+    }
+    .tab-button {
+      font-size: 1rem;
+      padding: 12px 0;
+    }
+    .form-button {
+      font-size: 1.1rem;
+      padding: 14px 0;
+    }
+    .form-input {
+      padding: 14px 12px;
+      font-size: 1rem;
+    }
+    .input-group.floating label {
+      left: 12px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="auth-container" role="main" aria-label="ระบบจองคิวรองเท้า SNEAKER SPECIAL">
+  <div class="logo-section" aria-label="โลโก้แบรนด์">
+    <div class="logo" aria-hidden="true">👟</div>
+    <h1 class="brand-name">SNEAKER SPECIAL</h1>
+    <p class="brand-tagline">ระบบจองคิวรองเท้าสำหรับรุ่นพิเศษ</p>
+  </div>
+  <div class="form-tabs" role="tablist">
+    <button class="tab-button active" onclick="switchTab('login')" role="tab" aria-selected="true" aria-controls="loginPanel" id="loginTab">เข้าสู่ระบบ</button>
+    <button class="tab-button" onclick="switchTab('register')" role="tab" aria-selected="false" aria-controls="registerPanel" id="registerTab">สมัครสมาชิก</button>
+  </div>
+  <div class="form-container">
+    <!-- Login -->
+    <div class="form-panel active" id="loginPanel" role="tabpanel" aria-labelledby="loginTab">
+      <form id="loginForm" novalidate>
+        <div class="error-message" id="loginError" role="alert" aria-live="assertive"></div>
+        <div class="success-message" id="loginSuccess" role="alert" aria-live="polite"></div>
+        <div class="input-group floating">
+          <input type="email" class="form-input" id="loginEmail" required placeholder=" " aria-describedby="loginEmailLabel" autocomplete="username" />
+          <label for="loginEmail" id="loginEmailLabel">อีเมล</label>
+        </div>
+        <div class="input-group floating">
+          <input type="password" class="form-input" id="loginPassword" required placeholder=" " autocomplete="current-password" />
+          <label for="loginPassword">รหัสผ่าน</label>
+        </div>
+        <button type="submit" class="form-button"><i class="fas fa-sign-in-alt"></i> เข้าสู่ระบบ</button>
+      </form>
+      <p style="text-align:center; margin-top:12px;">
+        <a href="#" onclick="forgotPassword();return false;" style="color:#7c3aed;">ลืมรหัสผ่าน?</a>
+      </p>
+    </div>
+    <!-- Register -->
+    <div class="form-panel" id="registerPanel" role="tabpanel" aria-labelledby="registerTab">
+      <form id="registerForm" novalidate>
+        <div class="error-message" id="registerError" role="alert" aria-live="assertive"></div>
+        <div class="success-message" id="registerSuccess" role="alert" aria-live="polite"></div>
+        <div class="input-group floating">
+          <input type="text" class="form-input" id="registerName" required placeholder=" " autocomplete="name" />
+          <label for="registerName">ชื่อ-นามสกุล</label>
+        </div>
+        <div class="input-group floating">
+          <input type="email" class="form-input" id="registerEmail" required placeholder=" " autocomplete="email" />
+          <label for="registerEmail">อีเมล</label>
+        </div>
+        <div class="input-group floating">
+          <input type="tel" class="form-input" id="registerPhone" required placeholder=" " autocomplete="tel" />
+          <label for="registerPhone">เบอร์โทรศัพท์</label>
+        </div>
+        <div class="input-group floating">
+          <input type="password" class="form-input" id="registerPassword" required placeholder=" " autocomplete="new-password" />
+          <label for="registerPassword">รหัสผ่าน</label>
+        </div>
+        <div class="input-group floating">
+          <input type="password" class="form-input" id="confirmPassword" required placeholder=" " autocomplete="new-password" />
+          <label for="confirmPassword">ยืนยันรหัสผ่าน</label>
+        </div>
+        <div class="terms-check">
+          <input type="checkbox" id="agreeTerms" required />
+          <label for="agreeTerms">ฉันยอมรับ <a href="#" tabindex="0">ข้อกำหนด</a> และ <a href="#" tabindex="0">นโยบาย</a></label>
+        </div>
+        <button type="submit" class="form-button"><i class="fas fa-user-plus"></i> สมัครสมาชิก</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP RESET -->
+<div id="popupContainer" aria-live="assertive" aria-atomic="true"></div>
+
+<script>
+let forgotEmail = '';
+
+function switchTab(tab) {
+  // Reset errors & success
+  showError('');
+  showSuccess('');
+
+  document.querySelectorAll('.tab-button').forEach(btn => {
+    btn.classList.remove('active');
+    btn.setAttribute('aria-selected', 'false');
+  });
+  document.querySelectorAll('.form-panel').forEach(panel => panel.classList.remove('active'));
+
+  if (tab === 'login') {
+    document.getElementById('loginPanel').classList.add('active');
+    const loginTab = document.getElementById('loginTab');
+    loginTab.classList.add('active');
+    loginTab.setAttribute('aria-selected', 'true');
+  } else {
+    document.getElementById('registerPanel').classList.add('active');
+    const registerTab = document.getElementById('registerTab');
+    registerTab.classList.add('active');
+    registerTab.setAttribute('aria-selected', 'true');
+  }
+}
+
+function showError(msg) {
+  document.getElementById('loginError').innerText = '';
+  document.getElementById('registerError').innerText = '';
+  if (document.getElementById('loginPanel').classList.contains('active')) {
+    document.getElementById('loginError').innerText = msg;
+  } else {
+    document.getElementById('registerError').innerText = msg;
+  }
+}
+
+function showSuccess(msg) {
+  document.getElementById('loginSuccess').innerText = '';
+  document.getElementById('registerSuccess').innerText = '';
+  if (document.getElementById('loginPanel').classList.contains('active')) {
+    document.getElementById('loginSuccess').innerText = msg;
+  } else {
+    document.getElementById('registerSuccess').innerText = msg;
+  }
+}
+
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  showError('');
+  showSuccess('');
+
+  const name = registerName.value.trim();
+  const email = registerEmail.value.trim();
+  const phone = registerPhone.value.trim();
+  const password = registerPassword.value;
+  const confirm = confirmPassword.value;
+
+  if (!agreeTerms.checked) {
+    return showError('กรุณายอมรับข้อกำหนด');
+  }
+  if (password.length < 6) {
+    return showError('รหัสผ่านต้องมีอย่างน้อย 6 ตัว');
+  }
+  if (password !== confirm) {
+    return showError('รหัสผ่านไม่ตรงกัน');
+  }
+
+  let users = JSON.parse(localStorage.getItem('users') || '[]');
+  if (users.find(u => u.email === email)) return showError('อีเมลนี้ถูกใช้แล้ว');
+  if (users.find(u => u.phone === phone)) return showError('เบอร์นี้ถูกใช้แล้ว');
+
+  users.push({ name, email, phone, password });
+  localStorage.setItem('users', JSON.stringify(users));
+  showSuccess('สมัครสมาชิกสำเร็จ');
+  setTimeout(() => switchTab('login'), 1300);
+});
+
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  showError('');
+  showSuccess('');
+
+  const email = loginEmail.value.trim();
+  const password = loginPassword.value;
+
+  let users = JSON.parse(localStorage.getItem('users') || '[]');
+  const user = users.find(u => u.email === email && u.password === password);
+
+  if (!user) return showError('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+
+  localStorage.setItem('currentUser', JSON.stringify(user));
+  showSuccess('เข้าสู่ระบบสำเร็จ ยินดีต้อนรับเข้าสู่ SNEAKER');
+
+  setTimeout(() => window.location.href = 'products.html', 1500);
+});
+
+function forgotPassword() {
+  showError('');
+  const email = loginEmail.value.trim();
+  if (!email) return showError('กรุณากรอกอีเมล');
+
+  let users = JSON.parse(localStorage.getItem('users') || '[]');
+  const user = users.find(u => u.email === email);
+  if (!user) return showError('ไม่พบอีเมลนี้ในระบบ');
+
+  forgotEmail = email;
+
+  const popup = document.createElement('div');
+  popup.className = 'popup-overlay';
+  popup.innerHTML = `
+    <div class="popup-box" role="dialog" aria-modal="true" aria-labelledby="resetPasswordTitle">
+      <h3 id="resetPasswordTitle">🔐 รีเซ็ตรหัสผ่าน</h3>
+      <p>อีเมล: <strong>${email}</strong></p>
+      <input type="password" id="newPassword" placeholder="รหัสผ่านใหม่ (6 ตัวขึ้นไป)" aria-describedby="popupError" />
+      <div id="popupError" style="color:red; font-size:0.9em; min-height: 1.2em;"></div>
+      <button class="confirm" onclick="submitResetPassword()">รีเซ็ต</button>
+      <button class="cancel" onclick="closePopup()">ยกเลิก</button>
+    </div>
+  `;
+  document.getElementById('popupContainer').appendChild(popup);
+  document.getElementById('newPassword').focus();
+}
+
+function submitResetPassword() {
+  const newPassInput = document.getElementById('newPassword');
+  const errorDiv = document.getElementById('popupError');
+  errorDiv.textContent = '';
+  const newPassword = newPassInput.value;
+
+  if (newPassword.length < 6) {
+    errorDiv.textContent = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัว';
+    newPassInput.focus();
+    return;
+  }
+
+  let users = JSON.parse(localStorage.getItem('users') || '[]');
+  const userIndex = users.findIndex(u => u.email === forgotEmail);
+  if (userIndex === -1) {
+    errorDiv.textContent = 'เกิดข้อผิดพลาด ไม่พบผู้ใช้';
+    return;
+  }
+
+  users[userIndex].password = newPassword;
+  localStorage.setItem('users', JSON.stringify(users));
+  closePopup();
+  showSuccess('รีเซ็ตรหัสผ่านสำเร็จ กรุณาเข้าสู่ระบบใหม่');
+}
+
+function closePopup() {
+  const popupContainer = document.getElementById('popupContainer');
+  popupContainer.innerHTML = '';
+}
+</script>
+</body>
+</html>

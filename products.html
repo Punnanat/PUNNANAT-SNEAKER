@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>เลือกรองเท้ารุ่นพิเศษ | SNEAKER SPECIAL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: 'Sarabun', sans-serif; background: #ede9fe; margin: 0; }
+    .gallery-container { max-width: 1100px; margin: 40px auto; }
+    .gallery-title { text-align: center; font-size: 2em; margin-bottom: 24px; }
+    .product-grid { display: flex; flex-wrap: wrap; gap: 32px; justify-content: center; }
+    .product-card {
+      background: #fff; border-radius: 18px; box-shadow: 0 2px 8px #0001;
+      width: 300px; padding: 20px; display: flex; flex-direction: column; align-items: center;
+    }
+    .product-card img { width: 200px; border-radius: 12px; }
+    .product-name { font-size: 1.1em; font-weight: bold; margin: 10px 0 4px 0; }
+    .product-meta { color: #555; font-size: 0.97em; margin-bottom: 8px; text-align: center; }
+    .product-price { font-size: 1.1em; color: #7c3aed; margin-bottom: 10px; }
+    .product-btn { background: #7c3aed; color: #fff; border: none; border-radius: 8px; padding: 10px 24px; font-size: 1em; cursor: pointer; }
+    .product-btn:hover { background: #5b21b6; }
+    .logout-btn { position: fixed; top: 20px; right: 30px; background: #ff1900; color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-size: 1em; cursor: pointer; }
+
+    /* Popup Overlay */
+    .popup-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      display: none; justify-content: center; align-items: center;
+      z-index: 9999;
+    }
+
+    .popup-box {
+      background: #fff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      max-width: 90%;
+      text-align: center;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+
+    .popup-box h2 {
+      color: #7c3aed;
+      margin-bottom: 10px;
+    }
+
+    .popup-box p {
+      font-size: 1.1em;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .popup-box button {
+      background: #7c3aed;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+
+    .popup-box button:hover {
+      background: #5b21b6;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <button class="logout-btn" onclick="logout()">ออกจากระบบ</button>
+
+  <div class="gallery-container">
+    <div class="gallery-title">เลือกรองเท้ารุ่นพิเศษเพื่อจอง</div>
+    <div id="clockDisplay" style="text-align:center; font-weight:bold; color:#7c3aed; margin-bottom:12px;"></div>
+
+    <div style="text-align:center; margin-bottom:20px; font-size:1.1em;">
+      👤 Username: <span id="userName" style="font-weight:bold;"></span><br>
+      📧 Email: <span id="userEmail" style="font-weight:bold;"></span>
+    </div>
+
+    <div class="product-grid" id="productGrid"></div>
+  </div>
+
+  <!-- Popup -->
+  <div class="popup-overlay" id="popupOverlay" onclick="closePopup()">
+    <div class="popup-box" onclick="event.stopPropagation()">
+      <h2 id="popupTitle">กำลังไปหน้าจอง...</h2>
+      <p id="popupMessage">กรุณารอสักครู่</p>
+      <button onclick="closePopup()">ตกลง</button>
+    </div>
+  </div>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem('currentUser'));
+    if (user) {
+      document.getElementById('userName').innerText = user.name;
+      document.getElementById('userEmail').innerText = user.email;
+    } else {
+      window.location.href = "index.html"; // redirect ถ้าไม่มี user
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const time = now.toLocaleTimeString('th-TH', {
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+      });
+      document.getElementById('clockDisplay').innerText = "เวลา: " + time;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    const SHEET_URL = "https://script.google.com/macros/s/AKfycbziDixR5QDRUwF0MyG2MZjpZnN12aerT-xj0sHSMhMfryOcqcR3a87tqPw6DfWxUTxt/exec";
+
+    const products = [
+      {
+        id: "blackcat",
+        name: 'Nike Air Jordan 4 "Black Cat" 2024',
+        code: "CU1110-010",
+        price: 8900,
+        img: "https://www.sneakerfiles.com/wp-content/uploads/2024/08/air-jordan-4-rm-black-cat-FQ7939-004-release-info-1024x725.jpg",
+        release: "25 กันยายน 2025",
+        stock: 5
+      },
+      {
+        id: "travis1",
+        name: 'Nike Air Jordan 1 Low OG "Travis Scott"',
+        code: "DM7866-162",
+        price: 15900,
+        img: "https://2app.kicksonfire.com/kofapp/upload/events_images/ipad_travis-scott-x-air-jordan-1-low-og-black-olive-0.png",
+        release: "25 กันยายน 2025",
+        stock: 5
+      },
+      {
+        id: "yeezy",
+        name: 'adidas Yeezy Boost 350 V2 "Zebra"',
+        code: "CP9654",
+        price: 12500,
+        img: "https://www.sneakerfiles.com/wp-content/uploads/2018/10/adidas-yeezy-boost-350-v2-zebra-restock.jpg",
+        release: "25 กันยายน 2025",
+        stock: 5
+      },
+      {
+        id: "offwhite",
+        name: 'Nike Air Presto Off-White',
+        code: "AA3830-001",
+        price: 32000,
+        img: "https://www.kickgame.com/cdn/shop/products/Nike-Air-Presto-OW-AA3830-100-White_1.png?v=1658243604",
+        release: "25 กันยายน 2025",
+        stock: 5
+      }
+    ];
+
+    function renderSkeleton() {
+      const htmlArray = products.map(p => `
+        <div class="product-card" id="card-${p.code}">
+          <img src="${p.img}" alt="${p.name}">
+          <div class="product-name">${p.name}</div>
+          <div class="product-meta">
+            รหัส: ${p.code}<br>
+            เปิดขาย: ${p.release}<br>
+            จำนวน: ${p.stock} คู่<br>
+            <span id="status-${p.code}" style="color:#999;">⏳ กำลังเช็กสต็อก...</span>
+          </div>
+          <div class="product-price">฿${p.price.toLocaleString()}</div>
+          <button class="product-btn" id="btn-${p.code}">จอง</button>
+        </div>
+      `);
+      document.getElementById('productGrid').innerHTML = htmlArray.join('');
+    }
+
+    async function fetchStock(code) {
+      const url = `${SHEET_URL}?checkStock=true&code=${encodeURIComponent(code)}`;
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Network response not OK");
+        const data = await res.json();
+        return typeof data.count === 'number' ? data.count : null;
+      } catch (error) {
+        console.error("Error fetching stock:", error);
+        return null;
+      }
+    }
+
+    async function updateStockStatus() {
+      for (const p of products) {
+        const statusEl = document.getElementById(`status-${p.code}`);
+        const btnEl = document.getElementById(`btn-${p.code}`);
+
+        const stockCount = await fetchStock(p.code);
+        if (stockCount === null) {
+          statusEl.innerText = '✔ เปิดให้จองแล้ว';
+          statusEl.style.color = '#16a34a';
+          btnEl.disabled = false;
+          btnEl.innerText = 'จองเลย';
+          btnEl.onclick = () => showPopupAndRedirect(p.name, p.id);
+          continue;
+        }
+
+        if (stockCount >= p.stock) {
+          statusEl.innerText = '❌ สินค้าหมด';
+          statusEl.style.color = 'red';
+          btnEl.disabled = true;
+          btnEl.innerText = 'เต็มแล้ว';
+        } else {
+          const remaining = p.stock - stockCount;
+          statusEl.innerText = remaining <= 2 ? '⚠️ เหลือไม่กี่คู่แล้ว' : '✔ เปิดให้จองแล้ว';
+          statusEl.style.color = remaining <= 2 ? '#f59e0b' : '#16a34a';
+          btnEl.disabled = false;
+          btnEl.innerText = 'จองเลย';
+          btnEl.onclick = () => showPopupAndRedirect(p.name, p.id);
+        }
+      }
+    }
+
+    function showPopupAndRedirect(productName, productId) {
+      document.getElementById('popupTitle').innerText = 'จองสำเร็จ กรุณากรอกข้อมูล';
+      document.getElementById('popupMessage').innerText = `คุณได้เลือกจอง: ${productName}`;
+      document.getElementById('popupOverlay').style.display = 'flex';
+
+      setTimeout(() => {
+        window.location.href = `order.html?product=${productId}`;
+      }, 2500);
+    }
+
+    function closePopup() {
+      document.getElementById('popupOverlay').style.display = 'none';
+    }
+
+    function logout() {
+      localStorage.removeItem('currentUser');
+      window.location.href = "https://punnanat.github.io/PUNNANAT-SNEAKER/";
+    }
+
+    renderSkeleton();
+    updateStockStatus();
+  </script>
+</body>
+</html>
